@@ -31,7 +31,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install deps
-        run: pip install -r requirements.txt
+        run: pip3 install -r requirements.txt
 
       - name: Check vapoursynth
-        run: python -c "import vapoursynth; print(vapoursynth.core.version_number())"
+        run: python3 -c "import vapoursynth; print(vapoursynth.core.version_number())"
