@@ -1,5 +1,4 @@
 name: Setup Vapoursynth
-
 description: Setup Vapoursynth in the current runner
 
 inputs:
@@ -15,14 +14,8 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install vapoursynth deps
-      if: runner.os == 'windows'
-      shell: cmd
-      run: |
-        choco install zimg --confirm
-
     - name: Cache vapoursynth
-      if: runner.os == 'linux' || runner.os == 'macos' || runner.os == 'windows'
+      if: runner.os == 'linux' || runner.os == 'macos'
       id: cache-vs
       uses: actions/cache@v3
       with:
@@ -48,23 +41,27 @@ runs:
         echo "CORES=$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
         echo "PREFIX=/usr/local" >> $GITHUB_ENV
 
-    - name: Set env vars
-      if: runner.os == 'windows'
-      shell: cmd
-      run: |
-        setx CORES "%NUMBER_OF_PROCESSORS%"
-        setx PREFIX "C:\Program Files\VapourSynth"
+    - name: Install vapoursynth deps
+      if: runner.os == 'linux'
+      shell: bash
+      run: sudo apt install libzimg-dev
+
+    - name: Install vapoursynth deps
+      if: runner.os == 'macos'
+      shell: bash
+      run: brew install zimg
 
     - name: Install vapoursynth make-deps
-      if: (runner.os == 'linux' || runner.os == 'macos') && steps.cache-vs.outputs.cache-hit != 'true'
+      if: runner.os == 'linux' && steps.cache-vs.outputs.cache-hit != 'true'
       shell: bash
       run: pip3 install "cython==${{ inputs.cython-version }}"
 
     - name: Install vapoursynth make-deps
-      if: runner.os == 'windows' && steps.cache-vs.outputs.cache-hit != 'true'
-      shell: cmd
+      if: runner.os == 'macos' && steps.cache-vs.outputs.cache-hit != 'true'
+      shell: bash
       run: |
-        pip install "cython==${{ inputs.cython-version }}"
+        brew install automake
+        pip3 install "cython==${{ inputs.cython-version }}"
 
     - name: Make vapoursynth
       if: (runner.os == 'linux' || runner.os == 'macos') && steps.cache-vs.outputs.cache-hit != 'true'
@@ -76,25 +73,12 @@ runs:
         ./configure --prefix=$PREFIX --disable-x86-asm --disable-vspipe
         make -j$CORES
 
-    - name: Make vapoursynth
-      if: runner.os == 'windows' && steps.cache-vs.outputs.cache-hit != 'true'
-      shell: cmd
-      run: |
-        cd /tmp/vapoursynth
-        msbuild.exe vapoursynth.sln /p:Configuration=Release /p:Platform=x64
-
     - name: Install vapoursynth
       if: runner.os == 'linux' || runner.os == 'macos'
       shell: bash
       run: |
         cd /tmp/vapoursynth
         sudo make install -j$CORES
-
-    - name: Install vapoursynth
-      if: runner.os == 'windows'
-      shell: cmd
-      run: |
-        msiexec /i vapoursynth.msi
 
 branding:
   icon: video
