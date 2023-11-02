@@ -30,8 +30,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install vsrepo
+        run: pip install git+https://github.com/vapoursynth/vsrepo
+
       - name: Install deps
         run: pip install -r requirements.txt
 
+      - name: vsrepo install
+        run: vsrepo.py install havsfunc ffms2 d2v
+
       - name: Check vapoursynth
         run: python -c "import vapoursynth; print(vapoursynth.core.version_number())"
+
+      - name: Check vsrepo
+        run: vsrepo.py installed
