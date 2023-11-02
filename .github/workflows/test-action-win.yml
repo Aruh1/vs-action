@@ -1,4 +1,4 @@
-name: linuxtests
+name: windowstests
 
 on:
   push:
@@ -13,12 +13,12 @@ permissions:
 
 jobs:
   tests:
-    name: linuxtests
+    name: windowstests
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: ["3.8", "3.10", "3.11", "3.12"]
+        os: [windows-latest]
+        python-version: ["3.8", "3.11"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
