@@ -21,6 +21,10 @@ jobs:
         python-version: ["3.8", "3.11"]
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
       - name: Clone Dependencies
         run: pip install git+https://github.com/vapoursynth/vsrepo.git
 
@@ -28,10 +32,6 @@ jobs:
 
       - name: Setup vapoursynth
         uses: ./
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - name: Install deps
         run: pip install -r requirements.txt
