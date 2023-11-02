@@ -21,6 +21,9 @@ jobs:
         python-version: ["3.8", "3.11"]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Clone Dependencies
+        run: pip install git+https://github.com/vapoursynth/vsrepo.git
+
       - uses: actions/checkout@v4
 
       - name: Setup vapoursynth
@@ -32,6 +35,12 @@ jobs:
 
       - name: Install deps
         run: pip install -r requirements.txt
+
+      - name: vsrepo install
+        run: vsrepo.py install havsfunc ffms2 d2v
+
+      - name: Check vsrepo
+        run: vsrepo.py installed
 
       - name: Check vapoursynth
         run: python -c "import vapoursynth; print(vapoursynth.core.version_number())"
