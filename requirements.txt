@@ -1,2 +1,2 @@
 vapoursynth==65
-wheel==0.41.3
+wheel==0.42.0
