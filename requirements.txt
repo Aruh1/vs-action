@@ -1,2 +1,2 @@
-vapoursynth==65
+vapoursynth==66-RC1
 wheel==0.42.0
