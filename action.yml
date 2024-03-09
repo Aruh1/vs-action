@@ -5,11 +5,11 @@ inputs:
   vs-version:
     description: Vapoursynth version to use, defaults to latest
     required: true
-    default: R66-RC1 # renovate: datasource=pypi dep_name=vapoursynth
+    default: R66 # renovate: datasource=pypi dep_name=vapoursynth
   cython-version:
     description: Cython version to use, defaults to latest
     required: true
-    default: 3.0.8 # renovate: datasource=pypi dep_name=cython
+    default: 3.0.9 # renovate: datasource=pypi dep_name=cython
 
 runs:
   using: composite
