@@ -76,7 +76,7 @@ runs:
       shell: bash
       run: |
         VERSION="${{ inputs.zimg-version }}"
-        git clone https://bitbucket.org/the-sekrit-twc/zimg.git --depth 1 --recurse-submodules --shallow-submodules
+        git clone https://bitbucket.org/the-sekrit-twc/zimg.git /tmp/zimg --depth 1 --recurse-submodules --shallow-submodules
         cd /tmp/zimg
         ./autogen.sh
         ./configure --prefix=$PREFIX
