@@ -1,2 +1,2 @@
-vapoursynth>=66
+vapoursynth>=69
 wheel>=0.43.0
