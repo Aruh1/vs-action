@@ -34,4 +34,6 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Check vapoursynth
-        run: python -c "from vapoursynth import core; print(core)"
+        run: | 
+          python -c "from vapoursynth import core; print(core)"
+          python -m unittest discover -s test -p "*test.py"
