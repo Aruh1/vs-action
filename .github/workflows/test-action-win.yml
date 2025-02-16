@@ -18,21 +18,6 @@ jobs:
         git clone https://bitbucket.org/the-sekrit-twc/libp2p.git --depth 1
         git clone https://bitbucket.org/the-sekrit-twc/zimg.git --depth 1 --recurse-submodules --shallow-submodules
 
-    - name: Setup Python 3.8
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.8'
-
-    - name: Install Python 3.8 packages
-      run: |
-        python -m pip install -U pip
-        pip install -U cython setuptools wheel
-
-    - name: Get Python 3.8 install path
-      run: |
-        $py_install_path = (Split-Path -Path (Get-Command python.exe).Path)
-        echo "PYTHON38_PATH=$py_install_path" | Out-File -FilePath $env:GITHUB_ENV -Append
-
     - name: Setup Python 3.12
       uses: actions/setup-python@v5
       with:
@@ -48,13 +33,27 @@ jobs:
         $py_install_path = (Split-Path -Path (Get-Command python.exe).Path)
         echo "PYTHON_PATH=$py_install_path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+    - name: Setup Python 3.13
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Install Python 3.13 packages
+      run: |
+        python -m pip install -U pip
+        pip install -U cython setuptools wheel
+
+    - name: Get Python 3.13 install path
+      run: |
+        $py_install_path = (Split-Path -Path (Get-Command python.exe).Path)
+        echo "PYTHON13_PATH=$py_install_path" | Out-File -FilePath $env:GITHUB_ENV -Append
+
     - name: Get version number
       run: |
         echo "VS_CURRENT_RELEASE=$(python -c "from pathlib import Path; print((Path.cwd() / 'VAPOURSYNTH_VERSION').resolve().read_text().split(' ')[-1].strip().split('-')[0])")" | Out-File -FilePath $env:GITHUB_ENV -Append
 
     - name: Build
       run: |
-        $env:VSPYTHON38_PATH="${{ env.PYTHON38_PATH }}"
         $env:VSPYTHON_PATH="${{ env.PYTHON_PATH }}"
         msbuild msvc_project/VapourSynth.sln /t:Build /p:Configuration=Release /p:Platform=x64 /p:CurrentVersion=${{ env.VS_CURRENT_RELEASE }} /m
 
@@ -68,16 +67,11 @@ jobs:
         pip install .
         python -m unittest discover -s test -p "*test.py"
 
-    - name: Setup Python 3.8 a second time
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.8'
-
-    - name: Package for Python 3.8
+    - name: Package for Python 3.13
       run: |
         python setup.py bdist_wheel
 
-    - name: Run test with Python 3.8
+    - name: Run test with Python 3.13
       run: |
         pip install .
         python -m unittest discover -s test -p "*test.py"
@@ -92,7 +86,7 @@ jobs:
     needs: build-msvc
     strategy:
       matrix:
-        python: ["3.8", "3.12"]
+        python: ["3.12", "3.13"]
 
     steps:
     - name: Setup Python ${{ matrix.python }}
