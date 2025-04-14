@@ -4,7 +4,7 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build-msvc:
-    runs-on: [windows-latest, windows-2022, windows-2019]
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -18,35 +18,20 @@ jobs:
         git clone https://bitbucket.org/the-sekrit-twc/libp2p.git --depth 1
         git clone https://bitbucket.org/the-sekrit-twc/zimg.git --depth 1 --recurse-submodules --shallow-submodules
 
-    - name: Setup Python 3.12
+    - name: Setup Python versions
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
-    - name: Install Python 3.12 packages
+    - name: Install Python packages
       run: |
         python -m pip install -U pip
         pip install -U cython setuptools wheel
 
-    - name: Get Python 3.12 install path
+    - name: Get Python install path
       run: |
         $py_install_path = (Split-Path -Path (Get-Command python.exe).Path)
         echo "PYTHON_PATH=$py_install_path" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-    - name: Setup Python 3.13
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.13'
-
-    - name: Install Python 3.13 packages
-      run: |
-        python -m pip install -U pip
-        pip install -U cython setuptools wheel
-
-    - name: Get Python 3.13 install path
-      run: |
-        $py_install_path = (Split-Path -Path (Get-Command python.exe).Path)
-        echo "PYTHON13_PATH=$py_install_path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
     - name: Get version number
       run: |
@@ -57,22 +42,10 @@ jobs:
         $env:VSPYTHON_PATH="${{ env.PYTHON_PATH }}"
         msbuild msvc_project/VapourSynth.sln /t:Build /p:Configuration=Release /p:Platform=x64 /p:CurrentVersion=${{ env.VS_CURRENT_RELEASE }} /m
 
-    - name: Package for Python 3.12
+    - name: Package and Test
       run: |
         python setup.py bdist_wheel
         python setup.py sdist --formats=zip
-
-    - name: Run test with Python 3.12
-      run: |
-        pip install .
-        python -m unittest discover -s test -p "*test.py"
-
-    - name: Package for Python 3.13
-      run: |
-        python setup.py bdist_wheel
-
-    - name: Run test with Python 3.13
-      run: |
         pip install .
         python -m unittest discover -s test -p "*test.py"
 
