@@ -1,58 +1,64 @@
 name: Windows
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   build-msvc:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - uses: microsoft/setup-msbuild@v2
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
-    - name: Clone dependencies
-      run: |
-        git clone https://github.com/AviSynth/AviSynthPlus.git --depth 1
-        git clone https://github.com/vapoursynth/vsrepo.git --depth 1
-        git clone https://bitbucket.org/the-sekrit-twc/libp2p.git --depth 1
-        git clone https://bitbucket.org/the-sekrit-twc/zimg.git --depth 1 --recurse-submodules --shallow-submodules
+      - name: Clone dependencies
+        run: |
+          git clone https://github.com/AviSynth/AviSynthPlus.git --depth 1
+          git clone https://github.com/vapoursynth/vsrepo.git --depth 1
+          git clone https://bitbucket.org/the-sekrit-twc/libp2p.git --depth 1
+          git clone https://bitbucket.org/the-sekrit-twc/zimg.git --depth 1 --recurse-submodules --shallow-submodules
 
-    - name: Setup Python versions
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-    - name: Install Python packages
-      run: |
-        python -m pip install -U pip
-        pip install -U cython setuptools wheel
+      - name: Install Python packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade cython setuptools wheel
 
-    - name: Get Python install path
-      run: |
-        $py_install_path = (Split-Path -Path (Get-Command python.exe).Path)
-        echo "PYTHON_PATH=$py_install_path" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - name: Get Python install path
+        run: |
+          $py_install_path = (Split-Path -Path (Get-Command python.exe).Path)
+          echo "PYTHON_PATH=$py_install_path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-    - name: Get version number
-      run: |
-        echo "VS_CURRENT_RELEASE=$(python -c "from pathlib import Path; print((Path.cwd() / 'VAPOURSYNTH_VERSION').resolve().read_text().split(' ')[-1].strip().split('-')[0])")" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - name: Get VapourSynth version
+        run: |
+          echo "VS_CURRENT_RELEASE=$(python -c \"from pathlib import Path; print((Path.cwd() / 'VAPOURSYNTH_VERSION').resolve().read_text().split(' ')[-1].strip().split('-')[0])\")" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-    - name: Build
-      run: |
-        $env:VSPYTHON_PATH="${{ env.PYTHON_PATH }}"
-        msbuild msvc_project/VapourSynth.sln /t:Build /p:Configuration=Release /p:Platform=x64 /p:CurrentVersion=${{ env.VS_CURRENT_RELEASE }} /m
+      - name: Build VapourSynth
+        run: |
+          $env:VSPYTHON_PATH="${{ env.PYTHON_PATH }}"
+          msbuild msvc_project/VapourSynth.sln /t:Build /p:Configuration=Release /p:Platform=x64 /p:CurrentVersion=${{ env.VS_CURRENT_RELEASE }} /m
 
-    - name: Package and Test
-      run: |
-        python setup.py bdist_wheel
-        python setup.py sdist --formats=zip
-        pip install .
-        python -m unittest discover -s test -p "*test.py"
+      - name: Package and Test
+        run: |
+          python setup.py bdist_wheel
+          python setup.py sdist --formats=zip
+          pip install .
+          python -m unittest discover -s test -p "*test.py"
 
-    - uses: actions/upload-artifact@v4
-      with:
-        name: vapoursynth
-        path: dist
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vapoursynth
+          path: dist
 
   test-windows:
     runs-on: windows-latest
@@ -62,16 +68,17 @@ jobs:
         python: ["3.12", "3.13"]
 
     steps:
-    - name: Setup Python ${{ matrix.python }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python }}
+      - name: Setup Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
 
-    - uses: actions/download-artifact@v4
-      with:
-        name: vapoursynth
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vapoursynth
 
-    - name: Try installing
-      run: |
-        pip install vapoursynth --no-index --find-links .
-        python -c "from vapoursynth import core; print(core.std.BlankClip())"
+      - name: Test VapourSynth installation
+        run: |
+          pip install vapoursynth --no-index --find-links .
+          python -c "from vapoursynth import core; print(core.std.BlankClip())"
