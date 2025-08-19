@@ -62,12 +62,12 @@ runs:
     - name: Install cython (Linux)
       if: runner.os == 'Linux' && steps.cache-vs.outputs.cache-hit != 'true'
       shell: bash
-      run: uv pip install "cython==${{ inputs.cython-version }}"
+      run: uv venv pip install "cython==${{ inputs.cython-version }}"
 
     - name: Install cython (macOS)
       if: runner.os == 'macOS' && steps.cache-vs.outputs.cache-hit != 'true'
       shell: bash
-      run: uv pip install "cython==${{ inputs.cython-version }}"
+      run: uv pip install --system "cython==${{ inputs.cython-version }}"
 
     - name: Install automake (macOS)
       if: runner.os == 'macOS' && (steps.cache-vs.outputs.cache-hit != 'true' || steps.cache-zimg.outputs.cache-hit != 'true')
