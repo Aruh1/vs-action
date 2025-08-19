@@ -37,7 +37,7 @@ runs:
     - name: Cache zimg
       if: runner.os == 'Linux' || runner.os == 'macOS'
       id: cache-zimg
-      uses: actions/cache@v5
+      uses: actions/cache@v4
       with:
         key: ${{ runner.os }}-zimg-${{ inputs.zimg-version }}
         path: |
