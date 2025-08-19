@@ -33,9 +33,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
+          activate-environment: true
 
       - name: Install deps
-        run: uv venv pip install -r requirements.txt
+        run: uv pip install -r requirements.txt
 
       - name: Check vapoursynth
         run: | 
