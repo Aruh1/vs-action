@@ -21,19 +21,23 @@ jobs:
         python-version: ["3.12", "3.13"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup vapoursynth
         uses: ./
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install deps
-        run: pip install -r requirements.txt
+        run: uv pip install --system -r requirements.txt
 
       - name: Check vapoursynth
         run: | 
-          python -c "from vapoursynth import core; print(core)"
-          python -m unittest discover -s test -p "*test.py"
+          uv run python -c "from vapoursynth import core; print(core)"
+          uv run python -m unittest discover -s test -p "*test.py"

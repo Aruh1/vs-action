@@ -25,20 +25,24 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
 
-      - name: Install Python packages
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install Python packages with uv
         run: |
-          python -m pip install --upgrade pip
-          pip install --upgrade cython setuptools wheel
+          uv pip install --system cython setuptools wheel
 
       - name: Get Python install path
+        shell: pwsh
         run: |
           $py_install_path = (Split-Path -Path (Get-Command python.exe).Path)
           echo "PYTHON_PATH=$py_install_path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Get VapourSynth version
+        shell: pwsh
         run: |
           echo "VS_CURRENT_RELEASE=$(python -c \"from pathlib import Path; print((Path.cwd() / 'VAPOURSYNTH_VERSION').resolve().read_text().split(' ')[-1].strip().split('-')[0])\")" | Out-File -FilePath $env:GITHUB_ENV -Append
 
@@ -47,12 +51,17 @@ jobs:
           $env:VSPYTHON_PATH="${{ env.PYTHON_PATH }}"
           msbuild msvc_project/VapourSynth.sln /t:Build /p:Configuration=Release /p:Platform=x64 /p:CurrentVersion=${{ env.VS_CURRENT_RELEASE }} /m
 
-      - name: Package and Test
+      - name: Build wheel & sdist
         run: |
-          python setup.py bdist_wheel
-          python setup.py sdist --formats=zip
-          pip install .
-          python -m unittest discover -s test -p "*test.py"
+          uv build
+
+      - name: Install built package
+        run: |
+          uv pip install --system dist/*.whl
+
+      - name: Run unit tests
+        run: |
+          uv run python -m unittest discover -s test -p "*test.py"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -70,15 +79,21 @@ jobs:
     steps:
       - name: Setup Python ${{ matrix.python }}
         uses: actions/setup-python@v5
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python }}
 
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: vapoursynth
 
+      - name: Install VapourSynth wheel
+        run: |
+          uv pip install --system vapoursynth --no-index --find-links .
+
       - name: Test VapourSynth installation
         run: |
-          pip install vapoursynth --no-index --find-links .
-          python -c "from vapoursynth import core; print(core.std.BlankClip())"
+          uv run python -c "from vapoursynth import core; print(core.std.BlankClip())"
