@@ -33,7 +33,7 @@ jobs:
 
       - name: Install Python packages with uv
         run: |
-          uv pip install --system cython setuptools wheel
+          uv pip install cython setuptools wheel
 
       - name: Get Python install path
         shell: pwsh
@@ -57,7 +57,7 @@ jobs:
 
       - name: Install built package
         run: |
-          uv pip install --system dist/*.whl
+          uv pip install dist/*.whl
 
       - name: Run unit tests
         run: |
@@ -92,7 +92,7 @@ jobs:
 
       - name: Install VapourSynth wheel
         run: |
-          uv pip install --system vapoursynth --no-index --find-links .
+          uv pip install vapoursynth --no-index --find-links .
 
       - name: Test VapourSynth installation
         run: |
