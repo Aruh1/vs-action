@@ -24,7 +24,7 @@ jobs:
           git clone https://bitbucket.org/the-sekrit-twc/zimg.git --depth 1 --recurse-submodules --shallow-submodules
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
@@ -79,7 +79,7 @@ jobs:
 
     steps:
       - name: Setup Python ${{ matrix.python }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
