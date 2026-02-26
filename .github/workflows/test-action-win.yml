@@ -65,7 +65,7 @@ jobs:
           uv run python -m unittest discover -s test -p "*test.py"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: vapoursynth
           path: dist
@@ -88,7 +88,7 @@ jobs:
           activate-environment: true
 
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: vapoursynth
 
